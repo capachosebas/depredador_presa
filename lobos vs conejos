@@ -1,0 +1,75 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov  6 18:45:50 2020
+
+@author: grupo 10
+juan ibañez
+silvia Avella
+julian gracia
+
+ejercicio lobos vs conejos , problema inventado
+
+"""
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import odeint
+def df_dt(x, t, a, b, c, d):
+    """Función del sistema en forma canónica"""
+    dx = a * x[0]*(1.5+(-0.00009*x[0])) - b * x[0] * x[1]
+    dy = - c * x[1] + d * x[0] * x[1]
+    return np.array([dx, dy])
+# Parámetros
+a = 7.6
+b = 0.041
+c = 3
+d = 0.0099
+# Condiciones iniciales
+x0 = 7000
+y0 = 2020# Depredadores
+conds_iniciales = np.array([x0, y0])
+# Condiciones para integración
+tf = 20
+N = 8000
+t = np.linspace(0, tf, N)
+solucion = odeint(df_dt, conds_iniciales, t, args=(a, b, c, d))
+
+
+x_max = np.max(solucion[:,0]) * 1.05
+y_max = np.max(solucion[:,1]) * 1.05
+x = np.linspace(0, x_max, 25)
+y = np.linspace(0, y_max, 25)
+xx, yy = np.meshgrid(x, y)
+uu, vv = df_dt((xx, yy), 0, a, b, c, d)
+norm = np.sqrt(uu**2 + vv**2)
+uu = uu / norm
+vv = vv / norm
+
+def C(x, y, a, b, c, d):
+    return a * np.log(y) - b * y + c * np.log(x) - d * x
+fig, ax = plt.subplots(1,3)
+
+
+fig, bx = plt.subplots(1,1)
+bx.plot(t, solucion[:, 0], label='presa')
+bx.plot(t, solucion[:, 1], label='depredador')
+
+fig, cx = plt.subplots(1,1)
+cx.quiver(xx, yy, uu, vv, norm, cmap=plt.cm.gray)
+cx.plot(solucion[:, 0], solucion[:, 1])
+
+
+
+
+
+
+ax[0].plot(t, solucion[:, 0], label='presa')
+ax[0].plot(t, solucion[:, 1], label='depredador')
+ax[2].quiver(xx, yy, uu, vv, norm, cmap=plt.cm.gray)
+ax[2].plot(solucion[:, 0], solucion[:, 1])
+ax[1].plot(solucion[:, 0], solucion[:, 1], lw=2, alpha=0.8)
+ax[1].scatter(c/d, a/b)
+levels = (0.5, 0.6, 0.7, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.775, 0.78, 0.781)
+ax[1].contour(xx, yy, constant, levels, colors='blue', alpha=0.3)
